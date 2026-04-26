@@ -38,12 +38,18 @@ describe('Z.AI provider factories', () => {
     })
 
     it('throws error if API key is empty', () => {
-      expect(() => createZAIChat('glm-4.7', '')).toThrowError(/apiKey is required/i)
+      expect(() => createZAIChat('glm-4.7', '')).toThrowError(
+        /apiKey is required/i,
+      )
     })
 
     it('accepts custom baseURL', () => {
-      createZAIChat('glm-4.7', 'test_key', { baseURL: 'https://example.invalid/zai' })
-      expect(openAIState.lastOptions.baseURL).toBe('https://example.invalid/zai')
+      createZAIChat('glm-4.7', 'test_key', {
+        baseURL: 'https://example.invalid/zai',
+      })
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://example.invalid/zai',
+      )
     })
 
     it('returns ZAITextAdapter instance', () => {
@@ -54,16 +60,23 @@ describe('Z.AI provider factories', () => {
     it('adapter is properly configured', () => {
       createZAIChat('glm-4.7', 'test_key')
       expect(openAIState.lastOptions.defaultHeaders).toBeTruthy()
-      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe('en-US,en')
+      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe(
+        'en-US,en',
+      )
     })
 
     it('uses coding endpoint when coding: true', () => {
       createZAIChat('glm-4.7', 'test_key', { coding: true })
-      expect(openAIState.lastOptions.baseURL).toBe('https://api.z.ai/api/coding/paas/v4')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://api.z.ai/api/coding/paas/v4',
+      )
     })
 
     it('explicit baseURL overrides coding flag', () => {
-      createZAIChat('glm-4.7', 'test_key', { coding: true, baseURL: 'https://custom.url' })
+      createZAIChat('glm-4.7', 'test_key', {
+        coding: true,
+        baseURL: 'https://custom.url',
+      })
       expect(openAIState.lastOptions.baseURL).toBe('https://custom.url')
     })
   })
@@ -84,7 +97,9 @@ describe('Z.AI provider factories', () => {
     it('accepts custom baseURL', () => {
       vi.stubEnv('ZAI_API_KEY', 'env_key')
       zaiText('glm-4.7', { baseURL: 'https://example.invalid/zai' })
-      expect(openAIState.lastOptions.baseURL).toBe('https://example.invalid/zai')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://example.invalid/zai',
+      )
     })
 
     it('returns ZAITextAdapter instance', () => {
@@ -97,13 +112,17 @@ describe('Z.AI provider factories', () => {
       vi.stubEnv('ZAI_API_KEY', 'env_key')
       zaiText('glm-4.7')
       expect(openAIState.lastOptions.defaultHeaders).toBeTruthy()
-      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe('en-US,en')
+      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe(
+        'en-US,en',
+      )
     })
 
     it('uses coding endpoint when coding: true', () => {
       vi.stubEnv('ZAI_API_KEY', 'env_key')
       zaiText('glm-4.7', { coding: true })
-      expect(openAIState.lastOptions.baseURL).toBe('https://api.z.ai/api/coding/paas/v4')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://api.z.ai/api/coding/paas/v4',
+      )
     })
 
     it('explicit baseURL overrides coding flag', () => {
@@ -131,4 +150,3 @@ describe('Z.AI provider factories', () => {
     })
   })
 })
-

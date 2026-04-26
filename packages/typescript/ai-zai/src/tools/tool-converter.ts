@@ -8,7 +8,9 @@ import type { ZaiWebSearchTool } from './web-search-tool'
  * Union type representing any valid Z.AI tool.
  * Can be a standard function tool or a web search tool.
  */
-export type ZaiTool = OpenAI.Chat.Completions.ChatCompletionTool | ZaiWebSearchTool
+export type ZaiTool =
+  | OpenAI.Chat.Completions.ChatCompletionTool
+  | ZaiWebSearchTool
 
 /**
  * Converts an array of standard Tools to Zhipu AI specific format

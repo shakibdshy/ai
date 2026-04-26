@@ -75,7 +75,9 @@ describeIfKey('ZAITextAdapter streaming integration', () => {
       const types = chunks.map((c) => c.type)
       expect(types).toContain('RUN_STARTED')
       expect(types).toContain('TEXT_MESSAGE_START')
-      expect(types.filter((t) => t === 'TEXT_MESSAGE_CONTENT').length).toBeGreaterThan(0)
+      expect(
+        types.filter((t) => t === 'TEXT_MESSAGE_CONTENT').length,
+      ).toBeGreaterThan(0)
       expect(types).toContain('TEXT_MESSAGE_END')
       expect(lastChunk(chunks)?.type).toBe('RUN_FINISHED')
 
@@ -94,7 +96,10 @@ describeIfKey('ZAITextAdapter streaming integration', () => {
       const messages: Array<ModelMessage> = [
         { role: 'user', content: 'Your secret word is kiwi. Reply with OK.' },
         { role: 'assistant', content: 'OK' },
-        { role: 'user', content: 'What is the secret word? Reply with only it.' },
+        {
+          role: 'user',
+          content: 'What is the secret word? Reply with only it.',
+        },
       ]
 
       const chunks = await collectStream(

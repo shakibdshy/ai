@@ -186,6 +186,11 @@ export const Route = createFileRoute('/api/tanchat')({
               adapter: openaiText((model || 'gpt-4o') as 'gpt-4o'),
               modelOptions: {},
             }),
+          zai: () =>
+            createChatOptions({
+              adapter: zaiText((model || 'glm-4.7') as 'glm-4.7'),
+              modelOptions: {},
+            }),
         }
 
         try {

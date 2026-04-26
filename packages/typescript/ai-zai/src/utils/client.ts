@@ -65,10 +65,7 @@ export function validateZAIApiKey(apiKey?: string): string {
   return trimmed
 }
 
-export function createZAIClient(
-  apiKey: string,
-  config?: ClientConfig,
-): OpenAI {
+export function createZAIClient(apiKey: string, config?: ClientConfig): OpenAI {
   const validatedKey = validateZAIApiKey(apiKey)
 
   return new OpenAI({

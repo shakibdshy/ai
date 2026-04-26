@@ -14,7 +14,9 @@ const asChunk = (chunk: Record<string, unknown>) =>
 export function convertToolsToZAIFormat(
   tools: Array<Tool>,
 ): Array<OpenAI.Chat.Completions.ChatCompletionTool> {
-  return convertToolsToProviderFormat(tools) as unknown as Array<OpenAI.Chat.Completions.ChatCompletionTool>
+  return convertToolsToProviderFormat(
+    tools,
+  ) as unknown as Array<OpenAI.Chat.Completions.ChatCompletionTool>
 }
 
 export function mapZAIErrorToStreamChunk(

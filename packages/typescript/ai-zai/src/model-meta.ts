@@ -80,16 +80,8 @@ const GLM_5_1 = {
     input: ['text'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -124,16 +116,8 @@ const GLM_5_TURBO = {
     input: ['text'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -168,16 +152,8 @@ const GLM_5 = {
     input: ['text'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -213,17 +189,8 @@ const GLM_5V_TURBO = {
     input: ['text', 'image', 'video'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'image_generation',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'image_generation', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -262,16 +229,8 @@ const GLM_4_7 = {
     input: ['text'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -305,17 +264,8 @@ const GLM_4_6V = {
     input: ['text', 'image', 'video'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'image_generation',
-      'code_interpreter',
-      'mcp',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'image_generation', 'code_interpreter', 'mcp'],
   },
   pricing: {
     input: {
@@ -349,15 +299,8 @@ const GLM_4_6 = {
     input: ['text'],
     output: ['text'],
     endpoints: ['chat', 'chat-completions'],
-    features: [
-      'streaming',
-      'function_calling',
-      'structured_outputs',
-    ],
-    tools: [
-      'web_search',
-      'code_interpreter',
-    ],
+    features: ['streaming', 'function_calling', 'structured_outputs'],
+    tools: ['web_search', 'code_interpreter'],
   },
   pricing: {
     input: {

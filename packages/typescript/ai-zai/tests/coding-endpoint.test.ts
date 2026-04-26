@@ -54,7 +54,12 @@ describeIfKey('Z.AI Coding Endpoint', () => {
       const chunks = await collectStream(
         adapter.chatStream({
           model: 'glm-4.7',
-          messages: [{ role: 'user', content: 'What is 2+2? Reply with just the number.' }],
+          messages: [
+            {
+              role: 'user',
+              content: 'What is 2+2? Reply with just the number.',
+            },
+          ],
           temperature: 0,
           // Coding plan models use reasoning tokens internally — need enough headroom
           maxTokens: 256,
@@ -69,7 +74,9 @@ describeIfKey('Z.AI Coding Endpoint', () => {
 
       // With enough tokens, the model produces visible text content
       expect(types).toContain('TEXT_MESSAGE_START')
-      expect(types.filter((t) => t === 'TEXT_MESSAGE_CONTENT').length).toBeGreaterThan(0)
+      expect(
+        types.filter((t) => t === 'TEXT_MESSAGE_CONTENT').length,
+      ).toBeGreaterThan(0)
       expect(types).toContain('TEXT_MESSAGE_END')
 
       const full = fullTextFromChunks(chunks)
@@ -89,7 +96,12 @@ describeIfKey('Z.AI Coding Endpoint', () => {
       const chunks = await collectStream(
         adapter.chatStream({
           model: 'glm-4.7',
-          messages: [{ role: 'user', content: 'What is 3+3? Reply with just the number.' }],
+          messages: [
+            {
+              role: 'user',
+              content: 'What is 3+3? Reply with just the number.',
+            },
+          ],
           temperature: 0,
           maxTokens: 256,
           logger: createNoopLogger() as any,
@@ -132,7 +144,9 @@ describeIfKey('Z.AI Coding Endpoint', () => {
       const chunks = await collectStream(
         adapter.chatStream({
           model: 'glm-4.7',
-          systemPrompts: ['You must call the provided tool. Do not answer with normal text.'],
+          systemPrompts: [
+            'You must call the provided tool. Do not answer with normal text.',
+          ],
           messages: [
             {
               role: 'user',

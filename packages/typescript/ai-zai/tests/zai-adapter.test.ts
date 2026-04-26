@@ -23,7 +23,11 @@ vi.mock('openai', () => {
   return { default: OpenAI }
 })
 
-function createAdapter(overrides?: { apiKey?: string; baseURL?: string; coding?: boolean }) {
+function createAdapter(overrides?: {
+  apiKey?: string
+  baseURL?: string
+  coding?: boolean
+}) {
   return new ZAITextAdapter(
     {
       apiKey: overrides?.apiKey ?? 'test_api_key',
@@ -76,36 +80,50 @@ describe('ZAITextAdapter', () => {
     it('initializes OpenAI SDK with default Z.AI baseURL', () => {
       createAdapter()
       expect(openAIState.lastOptions).toBeTruthy()
-      expect(openAIState.lastOptions.baseURL).toBe('https://api.z.ai/api/paas/v4')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://api.z.ai/api/paas/v4',
+      )
     })
 
     it('supports custom baseURL', () => {
       createAdapter({ baseURL: 'https://example.invalid/zai' })
-      expect(openAIState.lastOptions.baseURL).toBe('https://example.invalid/zai')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://example.invalid/zai',
+      )
     })
 
     it('sets default headers (Accept-Language)', () => {
       createAdapter()
       expect(openAIState.lastOptions.defaultHeaders).toBeTruthy()
-      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe('en-US,en')
+      expect(openAIState.lastOptions.defaultHeaders['Accept-Language']).toBe(
+        'en-US,en',
+      )
     })
 
     it('validates API key (rejects Bearer prefix)', () => {
-      expect(() => createAdapter({ apiKey: 'Bearer abc' })).toThrowError(/raw token/i)
+      expect(() => createAdapter({ apiKey: 'Bearer abc' })).toThrowError(
+        /raw token/i,
+      )
     })
 
     it('validates API key (rejects whitespace)', () => {
-      expect(() => createAdapter({ apiKey: 'abc def' })).toThrowError(/whitespace/i)
+      expect(() => createAdapter({ apiKey: 'abc def' })).toThrowError(
+        /whitespace/i,
+      )
     })
 
     it('uses coding endpoint when coding: true', () => {
       createAdapter({ coding: true })
-      expect(openAIState.lastOptions.baseURL).toBe('https://api.z.ai/api/coding/paas/v4')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://api.z.ai/api/coding/paas/v4',
+      )
     })
 
     it('explicit baseURL overrides coding flag', () => {
       createAdapter({ coding: true, baseURL: 'https://example.invalid/zai' })
-      expect(openAIState.lastOptions.baseURL).toBe('https://example.invalid/zai')
+      expect(openAIState.lastOptions.baseURL).toBe(
+        'https://example.invalid/zai',
+      )
     })
   })
 
@@ -155,7 +173,9 @@ describe('ZAITextAdapter', () => {
       expect(mapped.tools).toHaveLength(1)
       expect(mapped.tools[0].type).toBe('function')
       expect(mapped.tools[0].function.name).toBe('get_weather')
-      expect(mapped.tools[0].function.parameters.additionalProperties).toBe(false)
+      expect(mapped.tools[0].function.parameters.additionalProperties).toBe(
+        false,
+      )
     })
 
     it('maps stop sequences from modelOptions.stopSequences to stop', () => {
@@ -193,10 +213,9 @@ describe('ZAITextAdapter', () => {
         opts: Pick<TextOptions, 'systemPrompts'>,
       ) => Array<any>
 
-      const out = convert(
-        [{ role: 'user', content: 'hi' }],
-        { systemPrompts: ['You are helpful', 'Be concise'] },
-      )
+      const out = convert([{ role: 'user', content: 'hi' }], {
+        systemPrompts: ['You are helpful', 'Be concise'],
+      })
 
       expect(out[0]).toEqual({
         role: 'system',
@@ -267,7 +286,10 @@ describe('ZAITextAdapter', () => {
           {
             role: 'user',
             content: [
-              { type: 'image', source: { type: 'url', value: 'https://x/y.png' } },
+              {
+                type: 'image',
+                source: { type: 'url', value: 'https://x/y.png' },
+              },
               { type: 'text', content: 'hello' },
             ] as any,
           },
@@ -290,7 +312,10 @@ describe('ZAITextAdapter', () => {
           {
             role: 'user',
             content: [
-              { type: 'image', source: { type: 'url', value: 'https://x/y.png' } },
+              {
+                type: 'image',
+                source: { type: 'url', value: 'https://x/y.png' },
+              },
               { type: 'text', content: 'hello' },
             ] as any,
           },
@@ -315,9 +340,9 @@ describe('ZAITextAdapter', () => {
       const adapter = createAdapter()
       openAIState.create.mockRejectedValueOnce(new Error('network down'))
 
-      await expect(
-        collect(adapter.chatStream(baseOptions())),
-      ).rejects.toThrow(/network down/i)
+      await expect(collect(adapter.chatStream(baseOptions()))).rejects.toThrow(
+        /network down/i,
+      )
     })
 
     it('handles empty messages array without crashing', async () => {
@@ -333,7 +358,9 @@ describe('ZAITextAdapter', () => {
         ]),
       )
 
-      const chunks = await collect(adapter.chatStream(baseOptions({ messages: [] })))
+      const chunks = await collect(
+        adapter.chatStream(baseOptions({ messages: [] })),
+      )
 
       expect(openAIState.create).toHaveBeenCalled()
       const callArgs = openAIState.create.mock.calls[0]
@@ -343,7 +370,9 @@ describe('ZAITextAdapter', () => {
 
     it('does not throw on malformed stream chunks', async () => {
       const adapter = createAdapter()
-      openAIState.create.mockResolvedValueOnce(streamOf([{ id: 'resp_1', model: 'glm-4.7' }]))
+      openAIState.create.mockResolvedValueOnce(
+        streamOf([{ id: 'resp_1', model: 'glm-4.7' }]),
+      )
 
       const chunks = await collect(adapter.chatStream(baseOptions()))
 
@@ -360,7 +389,11 @@ describe('ZAITextAdapter', () => {
       const adapter = createAdapter()
       openAIState.create.mockResolvedValueOnce(
         streamOf([
-          { id: 'resp_1', model: 'glm-4.7', choices: [{ delta: { content: 'He' } }] },
+          {
+            id: 'resp_1',
+            model: 'glm-4.7',
+            choices: [{ delta: { content: 'He' } }],
+          },
           {
             id: 'resp_1',
             model: 'glm-4.7',
@@ -394,7 +427,11 @@ describe('ZAITextAdapter', () => {
       const done = chunks.find((c) => c.type === 'RUN_FINISHED') as any
       expect(done).toBeTruthy()
       expect(done.finishReason).toBe('stop')
-      expect(done.usage).toEqual({ promptTokens: 1, completionTokens: 2, totalTokens: 3 })
+      expect(done.usage).toEqual({
+        promptTokens: 1,
+        completionTokens: 2,
+        totalTokens: 3,
+      })
     })
 
     it('emits TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END for tool calls', async () => {

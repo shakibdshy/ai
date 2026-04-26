@@ -2,10 +2,7 @@ import { getZAIApiKeyFromEnv } from '../utils/client'
 import { ZAITextAdapter } from './text'
 import type { ZAI_CHAT_MODELS } from '../model-meta'
 
-export {
-  ZAITextAdapter,
-  type ZAITextAdapterConfig,
-} from './text'
+export { ZAITextAdapter, type ZAITextAdapterConfig } from './text'
 export {
   ZAISummarizeAdapter,
   createZAISummarize,

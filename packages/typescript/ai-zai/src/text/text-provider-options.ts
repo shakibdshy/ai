@@ -143,7 +143,11 @@ export interface ZAIToolsOptions {
   /**
    * Configuration for tool choices.
    */
-  tool_choice?: 'auto' | 'none' | 'required' | OpenAI.Chat.ChatCompletionToolChoiceOption
+  tool_choice?:
+    | 'auto'
+    | 'none'
+    | 'required'
+    | OpenAI.Chat.ChatCompletionToolChoiceOption
 
   /**
    * A list of tools the model may call.
@@ -195,7 +199,8 @@ export interface ZAIMetadataOptions {
  * Combines all available options for maximum flexibility.
  */
 export interface ZAITextOptions
-  extends ZAIBaseOptions,
+  extends
+    ZAIBaseOptions,
     ZAIReasoningOptions,
     ZAIStructuredOutputOptions,
     ZAIToolsOptions,

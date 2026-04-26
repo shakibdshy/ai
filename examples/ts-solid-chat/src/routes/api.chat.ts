@@ -52,7 +52,7 @@ export const Route = createFileRoute('/api/chat')({
           if (provider === 'zai') {
             adapter = zaiText(model)
           } else {
-             if (!process.env.ANTHROPIC_API_KEY) {
+            if (!process.env.ANTHROPIC_API_KEY) {
               return new Response(
                 JSON.stringify({
                   error:

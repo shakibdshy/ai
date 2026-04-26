@@ -18,5 +18,3 @@
   - Structured output with Zod schema validation through system prompts
   - OpenAI-compatible API integration
   - Full TypeScript support with per-model type inference
-
-

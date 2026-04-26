@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { ZAI_CHAT_MODELS, ZAI_MODEL_META, type ZAIChatModelProviderOptionsByName } from '../src/model-meta'
+import {
+  ZAI_CHAT_MODELS,
+  ZAI_MODEL_META,
+  type ZAIChatModelProviderOptionsByName,
+} from '../src/model-meta'
 
 describe('ZAI model meta', () => {
   it('ZAI_CHAT_MODELS matches ZAI_MODEL_META keys', () => {

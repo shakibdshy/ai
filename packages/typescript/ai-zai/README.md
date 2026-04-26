@@ -49,7 +49,12 @@ const result = await generate({
   adapter,
   model: 'glm-4.7',
   messages: [
-    { role: 'user', content: [{ type: 'text', content: 'Hello! Introduce yourself briefly.' }] },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', content: 'Hello! Introduce yourself briefly.' },
+      ],
+    },
   ],
 })
 
@@ -70,10 +75,10 @@ const adapter = zaiText('glm-4.7')
 
 for await (const chunk of adapter.chatStream({
   model: 'glm-4.7',
-  messages: [{ role: 'user', content: 'What is the latest news about TanStack?' }],
-  tools: [
-    webSearchTool({ enable: true, search_result: true })
-  ]
+  messages: [
+    { role: 'user', content: 'What is the latest news about TanStack?' },
+  ],
+  tools: [webSearchTool({ enable: true, search_result: true })],
 })) {
   if (chunk.type === 'content') process.stdout.write(chunk.delta)
 }
@@ -94,9 +99,9 @@ for await (const chunk of adapter.chatStream({
   modelOptions: {
     thinking: {
       type: 'enabled',
-      clear_thinking: false // Optional: set to false to preserve reasoning across turns (GLM-4.7 only)
-    }
-  }
+      clear_thinking: false, // Optional: set to false to preserve reasoning across turns (GLM-4.7 only)
+    },
+  },
 })) {
   // Thinking content is streamed as part of the reasoning_content delta
   // The adapter currently merges reasoning content into the main content stream or handles it as configured
@@ -131,8 +136,8 @@ for await (const chunk of adapter.chatStream({
   messages: [{ role: 'user', content: 'Call echo with {"text":"hello"}.' }],
   tools,
   modelOptions: {
-    tool_stream: true // Enable streaming tool arguments
-  }
+    tool_stream: true, // Enable streaming tool arguments
+  },
 })) {
   if (chunk.type === 'tool_call') {
     const { id, function: fn } = chunk.toolCall
@@ -169,7 +174,12 @@ const adapter = zaiText('glm-4.7')
 for await (const chunk of adapter.chatStream({
   model: 'glm-4.7',
   messages: [
-    { role: 'user', content: [{ type: 'text', content: 'Stream a short poem about TypeScript.' }] },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', content: 'Stream a short poem about TypeScript.' },
+      ],
+    },
   ],
 })) {
   if (chunk.type === 'content') process.stdout.write(chunk.delta)
