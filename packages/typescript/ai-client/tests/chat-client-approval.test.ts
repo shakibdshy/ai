@@ -11,6 +11,10 @@ function createMockConnectionAdapter(options: { chunks: StreamChunk[] }) {
   })
 }
 
+/** Cast an event object to StreamChunk for type compatibility with EventType enum. */
+const asChunk = (chunk: Record<string, unknown>) =>
+  chunk as unknown as StreamChunk
+
 function createApprovalToolCallChunks(
   toolCalls: Array<{
     id: string
@@ -23,58 +27,70 @@ function createApprovalToolCallChunks(
   const timestamp = Date.now()
 
   // Start assistant message
-  chunks.push({
-    type: 'content',
-    id: 'msg-1',
-    model: 'test-model',
-    timestamp,
-    delta: '',
-    content: '',
-    role: 'assistant',
-  })
+  chunks.push(
+    asChunk({
+      type: 'TEXT_MESSAGE_START',
+      messageId: 'msg-1',
+      role: 'assistant',
+      timestamp,
+    }),
+  )
 
   for (const toolCall of toolCalls) {
-    // 1. Tool Call Chunk
-    chunks.push({
-      type: 'tool_call',
-      id: 'msg-1',
-      model: 'test-model',
-      timestamp,
-      toolCall: {
-        id: toolCall.id,
-        type: 'function',
-        function: {
-          name: toolCall.name,
-          arguments: toolCall.arguments,
-        },
-      },
-      index: 0,
-    })
+    // 1. Tool Call Start
+    chunks.push(
+      asChunk({
+        type: 'TOOL_CALL_START',
+        toolCallId: toolCall.id,
+        toolName: toolCall.name,
+        model: 'test-model',
+        timestamp,
+      }),
+    )
 
-    // 2. Approval Requested Chunk
-    chunks.push({
-      type: 'approval-requested',
-      id: 'msg-1',
-      model: 'test-model',
-      timestamp,
-      toolCallId: toolCall.id,
-      toolName: toolCall.name,
-      input: JSON.parse(toolCall.arguments),
-      approval: {
-        id: toolCall.approvalId,
-        needsApproval: true,
-      },
-    } as any) // Cast to any if types are not perfectly aligned yet, or use correct type
+    // 2. Tool Call Args
+    chunks.push(
+      asChunk({
+        type: 'TOOL_CALL_ARGS',
+        toolCallId: toolCall.id,
+        delta: toolCall.arguments,
+        args: toolCall.arguments,
+        model: 'test-model',
+        timestamp,
+      }),
+    )
+
+    // 3. Approval Requested (custom event)
+    chunks.push(
+      asChunk({
+        type: 'CUSTOM',
+        name: 'approval-requested',
+        model: 'test-model',
+        timestamp,
+        value: {
+          toolCallId: toolCall.id,
+          toolName: toolCall.name,
+          input: JSON.parse(toolCall.arguments),
+          approval: {
+            id: toolCall.approvalId,
+            needsApproval: true,
+          },
+        },
+      }),
+    )
   }
 
-  // Done chunk
-  chunks.push({
-    type: 'done',
-    id: 'msg-1',
-    model: 'test-model',
-    timestamp,
-    finishReason: 'tool_calls',
-  })
+  // Run Finished
+  chunks.push(
+    asChunk({
+      type: 'RUN_FINISHED',
+      runId: 'run-1',
+      threadId: 'thread-1',
+      model: 'test-model',
+      timestamp,
+      finishReason: 'tool_calls',
+    }),
+  )
 
   return chunks
 }

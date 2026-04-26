@@ -35,6 +35,7 @@ import type {
   CustomEvent,
   InferSchemaType,
   ModelMessage,
+  RunErrorEvent,
   RunFinishedEvent,
   SchemaInput,
   StreamChunk,
@@ -45,6 +46,7 @@ import type {
   ToolCallArgsEvent,
   ToolCallEndEvent,
   ToolCallStartEvent,
+  UIMessage,
 } from '../../types'
 import type {
   ChatMiddleware,
@@ -392,7 +394,7 @@ class TextEngine<
       currentMessageId: null,
       accumulatedContent: '',
       // References
-      messages: this.messages,
+      messages: convertMessagesToModelMessages(this.messages),
       createId: (prefix: string) => this.createId(prefix),
     }
   }
@@ -629,14 +631,15 @@ class TextEngine<
         chunk,
       )
       for (const outputChunk of outputChunks) {
-        this.logger.output(`type=${outputChunk.type}`, { chunk: outputChunk })
+        this.logger.output(`type=${(outputChunk as unknown as { type: string }).type}`, { chunk: outputChunk })
         yield outputChunk
         this.middlewareCtx.chunkIndex++
       }
 
       // Handle usage via middleware
-      if (chunk.type === 'RUN_FINISHED' && chunk.usage) {
-        await this.middlewareRunner.runOnUsage(this.middlewareCtx, chunk.usage)
+      const chunkAny = chunk as unknown as { type: string; usage?: { promptTokens: number; completionTokens: number; totalTokens: number } }
+      if (chunkAny.type === 'RUN_FINISHED' && chunkAny.usage) {
+        await this.middlewareRunner.runOnUsage(this.middlewareCtx, chunkAny.usage)
       }
 
       if (this.earlyTermination) {
@@ -646,28 +649,29 @@ class TextEngine<
   }
 
   private handleStreamChunk(chunk: StreamChunk): void {
-    switch (chunk.type) {
+    const c = chunk as unknown as { type: string }
+    switch (c.type) {
       // AG-UI Events
       case 'TEXT_MESSAGE_CONTENT':
-        this.handleTextMessageContentEvent(chunk)
+        this.handleTextMessageContentEvent(chunk as unknown as TextMessageContentEvent)
         break
       case 'TOOL_CALL_START':
-        this.handleToolCallStartEvent(chunk)
+        this.handleToolCallStartEvent(chunk as unknown as ToolCallStartEvent)
         break
       case 'TOOL_CALL_ARGS':
-        this.handleToolCallArgsEvent(chunk)
+        this.handleToolCallArgsEvent(chunk as unknown as ToolCallArgsEvent)
         break
       case 'TOOL_CALL_END':
-        this.handleToolCallEndEvent(chunk)
+        this.handleToolCallEndEvent(chunk as unknown as ToolCallEndEvent)
         break
       case 'RUN_FINISHED':
-        this.handleRunFinishedEvent(chunk)
+        this.handleRunFinishedEvent(chunk as unknown as RunFinishedEvent)
         break
       case 'RUN_ERROR':
-        this.handleRunErrorEvent(chunk)
+        this.handleRunErrorEvent(chunk as unknown as RunErrorEvent)
         break
       case 'STEP_FINISHED':
-        this.handleStepFinishedEvent(chunk)
+        this.handleStepFinishedEvent()
         break
 
       case 'TOOL_CALL_RESULT':
@@ -698,7 +702,7 @@ class TextEngine<
     if (chunk.content) {
       this.accumulatedContent = chunk.content
     } else {
-      this.accumulatedContent += chunk.delta
+      this.accumulatedContent += (chunk as unknown as { delta?: string }).delta ?? ''
     }
     this.middlewareCtx.accumulatedContent = this.accumulatedContent
   }
@@ -721,14 +725,12 @@ class TextEngine<
   }
 
   private handleRunErrorEvent(
-    _chunk: Extract<StreamChunk, { type: 'RUN_ERROR' }>,
+    _chunk: RunErrorEvent,
   ): void {
     this.earlyTermination = true
   }
 
-  private handleStepFinishedEvent(
-    _chunk: Extract<StreamChunk, { type: 'STEP_FINISHED' }>,
-  ): void {
+  private handleStepFinishedEvent(): void {
     // State tracking for STEP_FINISHED is handled by middleware
   }
 
@@ -1289,6 +1291,7 @@ class TextEngine<
     }
 
     const pending: Array<ToolCall> = []
+    const modelMessages = convertMessagesToModelMessages(this.messages)
 
     for (const message of modelMessages) {
       if (message.role === 'assistant' && message.toolCalls) {
@@ -1342,7 +1345,7 @@ class TextEngine<
 
   private buildMiddlewareConfig(): ChatMiddlewareConfig {
     return {
-      messages: this.messages,
+      messages: convertMessagesToModelMessages(this.messages),
       systemPrompts: [...this.systemPrompts],
       tools: [...this.tools],
       temperature: this.params.temperature,
@@ -1367,7 +1370,7 @@ class TextEngine<
     }
 
     // Sync context fields that depend on config
-    this.middlewareCtx.messages = this.messages
+    this.middlewareCtx.messages = convertMessagesToModelMessages(this.messages)
     this.middlewareCtx.systemPrompts = this.systemPrompts
     this.middlewareCtx.hasTools = this.tools.length > 0
     this.middlewareCtx.toolNames = this.tools.map((t) => t.name)

@@ -178,7 +178,8 @@ export function normalizeConnectionAdapter(
       try {
         const stream = connection.connect(messages, data, abortSignal)
         for await (const chunk of stream) {
-          if (chunk.type === 'RUN_FINISHED' || chunk.type === 'RUN_ERROR') {
+          const chunkType = (chunk as unknown as { type: string }).type
+          if (chunkType === 'RUN_FINISHED' || chunkType === 'RUN_ERROR') {
             hasTerminalEvent = true
           }
           push(chunk)
