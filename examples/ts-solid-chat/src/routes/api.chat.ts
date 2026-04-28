@@ -1,8 +1,21 @@
 import { createFileRoute } from '@tanstack/solid-router'
-import { chat, maxIterations, toServerSentEventsResponse } from '@tanstack/ai'
+import {
+  chat,
+  createChatOptions,
+  maxIterations,
+  toServerSentEventsResponse,
+} from '@tanstack/ai'
+import { openaiText } from '@tanstack/ai-openai'
+import { ollamaText } from '@tanstack/ai-ollama'
 import { anthropicText } from '@tanstack/ai-anthropic'
+import { geminiText } from '@tanstack/ai-gemini'
+import { openRouterText } from '@tanstack/ai-openrouter'
+import { grokText } from '@tanstack/ai-grok'
+import { groqText } from '@tanstack/ai-groq'
 import { zaiText } from '@tanstack/ai-zai'
 import { serverTools } from '@/lib/guitar-tools'
+import type { Provider } from '@/lib/model-selection'
+import type { AnyTextAdapter } from '@tanstack/ai'
 
 const SYSTEM_PROMPT = `You are a helpful assistant for a guitar store.
 
@@ -42,45 +55,80 @@ export const Route = createFileRoute('/api/chat')({
         const abortController = new AbortController()
 
         const { messages, data } = await request.json()
-        const provider = data?.provider || 'anthropic'
-        const model = data?.model || 'claude-sonnet-4-5'
+        const provider: Provider = data?.provider || 'openai'
+        const model: string = data?.model || 'gpt-4o'
 
         try {
-          let adapter
-          let modelOptions = {}
-
-          if (provider === 'zai') {
-            adapter = zaiText(model)
-          } else {
-            if (!process.env.ANTHROPIC_API_KEY) {
-              return new Response(
-                JSON.stringify({
-                  error:
-                    'ANTHROPIC_API_KEY not configured. Please add it to .env or .env.local',
-                }),
-                {
-                  status: 500,
-                  headers: { 'Content-Type': 'application/json' },
+          const adapterConfig: Record<
+            Provider,
+            () => { adapter: AnyTextAdapter }
+          > = {
+            anthropic: () =>
+              createChatOptions({
+                adapter: anthropicText(
+                  (model || 'claude-sonnet-4-5') as 'claude-sonnet-4-5',
+                ),
+              }),
+            openrouter: () =>
+              createChatOptions({
+                adapter: openRouterText('openai/gpt-5.1'),
+                modelOptions: {
+                  reasoning: {
+                    effort: 'medium',
+                  },
                 },
-              )
-            }
-            adapter = anthropicText(model)
-            modelOptions = {
-              thinking: {
-                type: 'enabled',
-                budget_tokens: 10000,
-              },
-            }
+              }),
+            gemini: () =>
+              createChatOptions({
+                adapter: geminiText(
+                  (model || 'gemini-2.5-flash') as 'gemini-2.5-flash',
+                ),
+                modelOptions: {
+                  thinkingConfig: {
+                    includeThoughts: true,
+                    thinkingBudget: 100,
+                  },
+                },
+              }),
+            grok: () =>
+              createChatOptions({
+                adapter: grokText((model || 'grok-3') as 'grok-3'),
+                modelOptions: {},
+              }),
+            groq: () =>
+              createChatOptions({
+                adapter: groqText(
+                  (model ||
+                    'llama-3.3-70b-versatile') as 'llama-3.3-70b-versatile',
+                ),
+              }),
+            ollama: () =>
+              createChatOptions({
+                adapter: ollamaText((model || 'gpt-oss:120b') as 'gpt-oss:120b'),
+                modelOptions: { think: 'low', options: { top_k: 1 } },
+              }),
+            openai: () =>
+              createChatOptions({
+                adapter: openaiText((model || 'gpt-4o') as 'gpt-4o'),
+                modelOptions: {},
+              }),
+            zai: () =>
+              createChatOptions({
+                adapter: zaiText((model || 'glm-4.7') as 'glm-4.7', {
+                  coding: true,
+                }),
+                modelOptions: {},
+              }),
           }
 
-          // Use the stream abort signal for proper cancellation handling
+          const options = adapterConfig[provider]()
+
           const stream = chat({
-            adapter,
+            ...options,
             tools: serverTools,
             systemPrompts: [SYSTEM_PROMPT],
             agentLoopStrategy: maxIterations(20),
             messages,
-            modelOptions,
             abortController,
           })
 

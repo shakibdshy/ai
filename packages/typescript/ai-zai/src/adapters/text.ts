@@ -119,10 +119,70 @@ export class ZAITextAdapter<
     }
   }
 
-  structuredOutput(
-    _options: StructuredOutputOptions<ResolveProviderOptions<TModel>>,
+  async structuredOutput(
+    options: StructuredOutputOptions<ResolveProviderOptions<TModel>>,
   ): Promise<StructuredOutputResult<unknown>> {
-    throw new Error('ZAITextAdapter.structuredOutput is not implemented')
+    const { chatOptions, outputSchema } = options
+    const messages = this.convertMessagesToInput(
+      chatOptions.messages,
+      chatOptions,
+    )
+    const { logger } = chatOptions
+
+    // Inject the JSON schema into the system prompt so the model knows
+    // the expected output shape (Z.AI doesn't support json_schema response_format)
+    const schemaPrompt = `\n\nOUTPUT SCHEMA (respond with valid JSON matching this schema):\n${JSON.stringify(outputSchema, null, 2)}`
+    const firstMsg = messages[0]
+    if (firstMsg && firstMsg.role === 'system') {
+      messages[0] = {
+        role: 'system',
+        content: ((firstMsg as { content: string }).content ?? '') + schemaPrompt,
+      }
+    } else {
+      messages.unshift({ role: 'system', content: schemaPrompt })
+    }
+
+    try {
+      logger.request(
+        `activity=chat-structured provider=zai model=${this.model} messages=${chatOptions.messages.length} stream=false`,
+        { provider: 'zai', model: this.model },
+      )
+
+      const response = await this.client.chat.completions.create(
+        {
+          model: chatOptions.model ?? this.model,
+          messages,
+          temperature: chatOptions.temperature ?? 0,
+          max_tokens: chatOptions.maxTokens,
+          top_p: chatOptions.topP,
+          stream: false,
+          response_format: { type: 'json_object' },
+        },
+        {
+          headers: this.getRequestHeaders(chatOptions),
+          signal: this.getAbortSignal(chatOptions),
+        },
+      )
+
+      const rawText = response.choices[0]?.message?.content ?? ''
+
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(rawText)
+      } catch {
+        throw new Error(
+          `Failed to parse structured output as JSON. Content: ${rawText.slice(0, 200)}${rawText.length > 200 ? '...' : ''}`,
+        )
+      }
+
+      return { data: parsed, rawText }
+    } catch (error: unknown) {
+      logger.errors('zai.structuredOutput fatal', {
+        error: toRunErrorPayload(error, 'zai.structuredOutput failed'),
+        source: 'zai.structuredOutput',
+      })
+      throw error
+    }
   }
 
   private mapTextOptionsToZAI(

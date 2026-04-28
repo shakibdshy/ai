@@ -33,6 +33,7 @@ type Provider =
   | 'grok'
   | 'groq'
   | 'openrouter'
+  | 'zai'
 
 const SYSTEM_PROMPT = `You are a helpful assistant for a guitar store.
 
@@ -188,7 +189,9 @@ export const Route = createFileRoute('/api/tanchat')({
             }),
           zai: () =>
             createChatOptions({
-              adapter: zaiText((model || 'glm-4.7') as 'glm-4.7'),
+              adapter: zaiText((model || 'glm-4.7') as 'glm-4.7', {
+                coding: true,
+              }),
               modelOptions: {},
             }),
         }
